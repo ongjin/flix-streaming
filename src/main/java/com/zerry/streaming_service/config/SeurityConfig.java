@@ -19,6 +19,7 @@ public class SeurityConfig {
                         .requestMatchers("/kafka-send").permitAll() // 엔드포인트는 인증 없이 접근 허용
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요
                 )
+
                 .httpBasic(Customizer.withDefaults()); // 기본 HTTP Basic 인증 사용 (테스트용)
         return http.build();
     }
