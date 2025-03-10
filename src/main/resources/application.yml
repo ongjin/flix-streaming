@@ -36,3 +36,6 @@ spring:
             port: 6379
     kafka:
         bootstrap-servers: localhost:9092
+        consumer:
+            group-id:
+                streaming-service: streaming-service

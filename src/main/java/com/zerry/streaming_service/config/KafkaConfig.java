@@ -34,21 +34,24 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConfig {
 
+    // 공통 Kafka 브로커 주소
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    // 인증 서비스 전용 컨슈머 그룹 아이디
+    @Value("${spring.kafka.consumer.group-id.streaming-service}")
+    private String authServiceGroupId;
+
     /**
-     * Kafka Producer 설정을 위한 프로퍼티들을 구성합니다.
+     * Producer 설정: Kafka에 메시지 전송 시 필요한 프로퍼티들을 구성합니다.
      */
     @Bean
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>();
-        // Kafka 브로커 주소
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        // 키, 값 직렬화 클래스 지정
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        // 추가 설정 가능 (예: retries, acks 등)
+        // 추가 Producer 설정 (예: acks, retries 등) 필요 시 추가
         return props;
     }
 
@@ -69,19 +72,17 @@ public class KafkaConfig {
     }
 
     /**
-     * Kafka Consumer 설정을 위한 프로퍼티들을 구성합니다.
+     * Consumer 설정: Kafka로부터 메시지 수신 시 필요한 프로퍼티들을 구성합니다.
      */
     @Bean
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
-        // Kafka 브로커 주소
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        // Consumer 그룹 ID
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "streaming-service-group");
-        // 키, 값 역직렬화 클래스 지정
+        // 전용 그룹 아이디 설정
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, authServiceGroupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        // 추가 설정 가능 (예: auto.offset.reset 등)
+        // 추가 Consumer 설정 (예: auto.offset.reset 등) 필요 시 추가
         return props;
     }
 
@@ -94,7 +95,7 @@ public class KafkaConfig {
     }
 
     /**
-     * KafkaListenerContainerFactory를 생성하여 @KafkaListener 사용을 가능하게 합니다.
+     * KafkaListenerContainerFactory를 생성하여 @KafkaListener를 통한 메시지 수신을 가능하게 합니다.
      */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {

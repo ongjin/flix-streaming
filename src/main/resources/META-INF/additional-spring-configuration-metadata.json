@@ -1,0 +1,14 @@
+{
+    "properties": [
+        {
+            "name": "spring.kafka.consumer.group-id.auth-service",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.kafka.consumer.group-id.auth-service'"
+        },
+        {
+            "name": "spring.kafka.consumer.group-id.streaming-service",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.kafka.consumer.group-id.streaming-service'"
+        }
+    ]
+}

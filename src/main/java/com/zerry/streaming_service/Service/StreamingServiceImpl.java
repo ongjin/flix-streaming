@@ -20,14 +20,4 @@ public class StreamingServiceImpl implements StreamingService {
         return "Hello, " + name + "! Welcome to Streaming Service.";
     }
 
-    /**
-     * 주어진 토픽에 메시지를 전송합니다.
-     * 
-     * @param topic   전송할 토픽 이름
-     * @param message 전송할 메시지
-     */
-    @Override
-    public void send(String topic, String message) {
-        kafkaTemplate.send(topic, message);
-    }
 }

@@ -7,7 +7,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zerry.streaming_service.Service.StreamingService;
+import com.zerry.streaming_service.Service.KafkaSender;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Slf4j
 public class StreamingController {
     @Autowired
-    private StreamingService streamingService;
+    private KafkaSender kafkaSender;
 
     @GetMapping("/health")
     public String healthCheck() {
@@ -48,7 +48,7 @@ public class StreamingController {
 
     @PostMapping("/kafka-send")
     public String kafkaSend(@RequestBody Map<String, Object> map) {
-        streamingService.send(map.get("topic").toString(), map.get("message").toString());
+        kafkaSender.send(map.get("topic").toString(), map.get("message").toString());
         return null;
     }
 
