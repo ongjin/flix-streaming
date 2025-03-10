@@ -16,7 +16,7 @@ public class SeurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/kafka-send").permitAll() // 엔드포인트는 인증 없이 접근 허용
+                        .requestMatchers("/kafka-send").permitAll() // 테스트
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요
                 )
 

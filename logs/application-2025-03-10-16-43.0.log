@@ -1,0 +1,150 @@
+2025-03-10 16:43:33.626  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification) 
+2025-03-10 16:43:33.629  o.a.k.c.c.i.ConsumerRebalanceListenerInvoker - [Consumer clientId=consumer-streaming-service-group-17, groupId=streaming-service-group] Revoke previously assigned partitions test-topic-0 
+2025-03-10 16:43:33.629  o.s.k.l.KafkaMessageListenerContainer - streaming-service-group: partitions revoked: [test-topic-0] 
+2025-03-10 16:43:33.630  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-17, groupId=streaming-service-group] Member consumer-streaming-service-group-17-81405539-668d-40ce-869a-2118bde53c1c sending LeaveGroup request to coordinator localhost:9092 (id: 2147483646 rack: null) due to the consumer unsubscribed from all topics 
+2025-03-10 16:43:33.630  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-17, groupId=streaming-service-group] Resetting generation and member id due to: consumer pro-actively leaving the group 
+2025-03-10 16:43:33.630  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-17, groupId=streaming-service-group] Request joining group due to: consumer pro-actively leaving the group 
+2025-03-10 16:43:33.630  o.a.k.c.c.i.LegacyKafkaConsumer - [Consumer clientId=consumer-streaming-service-group-17, groupId=streaming-service-group] Unsubscribed all topics or patterns and assigned partitions 
+2025-03-10 16:43:33.631  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-17, groupId=streaming-service-group] Resetting generation and member id due to: consumer pro-actively leaving the group 
+2025-03-10 16:43:33.631  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-17, groupId=streaming-service-group] Request joining group due to: consumer pro-actively leaving the group 
+2025-03-10 16:43:33.758  o.a.k.c.m.Metrics - Metrics scheduler closed 
+2025-03-10 16:43:33.759  o.a.k.c.m.Metrics - Closing reporter org.apache.kafka.common.metrics.JmxReporter 
+2025-03-10 16:43:33.759  o.a.k.c.m.Metrics - Closing reporter org.apache.kafka.common.telemetry.internals.ClientTelemetryReporter 
+2025-03-10 16:43:33.759  o.a.k.c.m.Metrics - Metrics reporters closed 
+2025-03-10 16:43:33.761  o.a.k.c.u.AppInfoParser - App info kafka.consumer for consumer-streaming-service-group-17 unregistered 
+2025-03-10 16:43:33.761  o.s.k.l.KafkaMessageListenerContainer - streaming-service-group: Consumer stopped 
+2025-03-10 16:43:33.762  o.s.b.w.e.t.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete 
+2025-03-10 16:43:34.428  o.s.b.w.e.t.GracefulShutdown - Graceful shutdown complete 
+2025-03-10 16:43:34.496  c.z.s.StreamingServiceApplication - Starting StreamingServiceApplication using Java 17.0.12 with PID 30868 (D:\workspace\streaming-service\target\classes started by user in D:\workspace\streaming-service) 
+2025-03-10 16:43:34.496  c.z.s.StreamingServiceApplication - No active profile set, falling back to 1 default profile: "default" 
+2025-03-10 16:43:34.655  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode 
+2025-03-10 16:43:34.656  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode. 
+2025-03-10 16:43:34.658  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.zerry.streaming_service.repository.StreamingRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository 
+2025-03-10 16:43:34.659  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces. 
+2025-03-10 16:43:34.752  o.s.b.w.e.t.TomcatWebServer - Tomcat initialized with port 8050 (http) 
+2025-03-10 16:43:34.753  o.a.c.c.StandardService - Starting service [Tomcat] 
+2025-03-10 16:43:34.753  o.a.c.c.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.36] 
+2025-03-10 16:43:34.766  o.a.c.c.C.[.[.[/] - Initializing Spring embedded WebApplicationContext 
+2025-03-10 16:43:34.766  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 268 ms 
+2025-03-10 16:43:34.929  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager 
+2025-03-10 16:43:35.054  o.s.b.a.e.w.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator' 
+2025-03-10 16:43:35.252  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729 
+2025-03-10 16:43:35.267  o.s.b.w.e.t.TomcatWebServer - Tomcat started on port 8050 (http) with context path '/' 
+2025-03-10 16:43:35.269  o.a.k.c.c.ConsumerConfig - ConsumerConfig values: 
+	allow.auto.create.topics = true
+	auto.commit.interval.ms = 5000
+	auto.include.jmx.reporter = true
+	auto.offset.reset = latest
+	bootstrap.servers = [localhost:9092]
+	check.crcs = true
+	client.dns.lookup = use_all_dns_ips
+	client.id = consumer-streaming-service-group-18
+	client.rack = 
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	enable.auto.commit = false
+	enable.metrics.push = true
+	exclude.internal.topics = true
+	fetch.max.bytes = 52428800
+	fetch.max.wait.ms = 500
+	fetch.min.bytes = 1
+	group.id = streaming-service-group
+	group.instance.id = null
+	group.protocol = classic
+	group.remote.assignor = null
+	heartbeat.interval.ms = 3000
+	interceptor.classes = []
+	internal.leave.group.on.close = true
+	internal.throw.on.fetch.stable.offset.unsupported = false
+	isolation.level = read_uncommitted
+	key.deserializer = class org.apache.kafka.common.serialization.StringDeserializer
+	max.partition.fetch.bytes = 1048576
+	max.poll.interval.ms = 300000
+	max.poll.records = 500
+	metadata.max.age.ms = 300000
+	metadata.recovery.strategy = none
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	partition.assignment.strategy = [class org.apache.kafka.clients.consumer.RangeAssignor, class org.apache.kafka.clients.consumer.CooperativeStickyAssignor]
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retry.backoff.max.ms = 1000
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	session.timeout.ms = 45000
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+	value.deserializer = class org.apache.kafka.common.serialization.StringDeserializer
+ 
+2025-03-10 16:43:35.271  o.a.k.c.t.i.KafkaMetricsCollector - initializing Kafka metrics collector 
+2025-03-10 16:43:35.274  o.a.k.c.u.AppInfoParser - Kafka version: 3.8.1 
+2025-03-10 16:43:35.274  o.a.k.c.u.AppInfoParser - Kafka commitId: 70d6ff42debf7e17 
+2025-03-10 16:43:35.275  o.a.k.c.u.AppInfoParser - Kafka startTimeMs: 1741592615274 
+2025-03-10 16:43:35.275  o.a.k.c.c.i.LegacyKafkaConsumer - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] Subscribed to topic(s): test-topic 
+2025-03-10 16:43:35.282  o.a.k.c.Metadata - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] Cluster ID: 03_-kijeTJOzCtp5gGaUvA 
+2025-03-10 16:43:35.282  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] Discovered group coordinator localhost:9092 (id: 2147483646 rack: null) 
+2025-03-10 16:43:35.283  c.z.s.StreamingServiceApplication - Started StreamingServiceApplication in 0.806 seconds (process running for 8855.244) 
+2025-03-10 16:43:35.283  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] (Re-)joining group 
+2025-03-10 16:43:35.285  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged 
+2025-03-10 16:43:35.290  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] Request joining group due to: need to re-join with the given member-id: consumer-streaming-service-group-18-2ec8e123-5a61-4d2d-bf6c-67ac6b3d3d75 
+2025-03-10 16:43:35.290  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] (Re-)joining group 
+2025-03-10 16:43:38.294  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] Successfully joined group with generation Generation{generationId=21, memberId='consumer-streaming-service-group-18-2ec8e123-5a61-4d2d-bf6c-67ac6b3d3d75', protocol='range'} 
+2025-03-10 16:43:38.295  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] Finished assignment for group at generation 21: {consumer-streaming-service-group-18-2ec8e123-5a61-4d2d-bf6c-67ac6b3d3d75=Assignment(partitions=[test-topic-0])} 
+2025-03-10 16:43:38.297  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] Successfully synced group in generation Generation{generationId=21, memberId='consumer-streaming-service-group-18-2ec8e123-5a61-4d2d-bf6c-67ac6b3d3d75', protocol='range'} 
+2025-03-10 16:43:38.297  o.a.k.c.c.i.ConsumerCoordinator - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] Notifying assignor about the new Assignment(partitions=[test-topic-0]) 
+2025-03-10 16:43:38.298  o.a.k.c.c.i.ConsumerRebalanceListenerInvoker - [Consumer clientId=consumer-streaming-service-group-18, groupId=streaming-service-group] Adding newly assigned partitions: test-topic-0 
+2025-03-10 16:43:38.302  o.a.k.c.c.i.ConsumerUtils - Setting offset for partition test-topic-0 to the committed offset FetchPosition{offset=7, offsetEpoch=Optional.empty, currentLeader=LeaderAndEpoch{leader=Optional[localhost:9092 (id: 1 rack: null)], epoch=0}} 
+2025-03-10 16:43:38.302  o.s.k.l.KafkaMessageListenerContainer - streaming-service-group: partitions assigned: [test-topic-0] 
