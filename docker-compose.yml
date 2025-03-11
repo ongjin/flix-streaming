@@ -30,4 +30,20 @@ services:
         container_name: redis
         ports:
             - "6379:6379"
+
+    postgres:
+        image: postgres:latest
+        container_name: postgres
+        restart: always
+        environment:
+            POSTGRES_DB: flix # 원하는 DB 이름
+            POSTGRES_USER: dydwls140 # DB 사용자명
+            POSTGRES_PASSWORD: "@astems1027" # DB 비밀번호
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data # 데이터 영구 저장
+
+volumes:
+    postgres_data:
 # docker-compose up

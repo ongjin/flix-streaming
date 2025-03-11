@@ -1,4 +1,4 @@
-package com.zerry.streaming_service.Service;
+package com.zerry.streaming_service.service;
 
 /**
  * SampleService Interface

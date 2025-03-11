@@ -39,7 +39,7 @@ public class KafkaConfig {
     private String bootstrapServers;
 
     // 인증 서비스 전용 컨슈머 그룹 아이디
-    @Value("${spring.kafka.consumer.group-id.streaming-service}")
+    @Value("${spring.kafka.consumer.group-id}")
     private String authServiceGroupId;
 
     /**

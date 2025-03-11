@@ -1,4 +1,4 @@
-package com.zerry.streaming_service.Service;
+package com.zerry.streaming_service.service;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;

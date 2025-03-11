@@ -1,5 +1,5 @@
 server:
-    port: 8050
+    port: 8051
     servlet:
         context-path: /
         encoding:
@@ -15,20 +15,24 @@ spring:
     application:
         name: streaming-service
     datasource:
-        url: jdbc:h2:mem:testdb
+        url: jdbc:postgresql://localhost:5432/flix-streaming
+        username: dydwls140
+        password: "@astems1027"
         driver-class-name: org.postgresql.Driver
-        # driver-class-name: org.h2.Driver
-        username: sa
-        password:
     jpa:
         hibernate:
-            ddl-auto: update # 애플리케이션 시작 시 데이터베이스 스키마를 자동 업데이트합니다.
+            # ddl-auto: update # 애플리케이션 시작 시 데이터베이스 스키마를 자동 업데이트합니다.
+            ddl-auto: none
         show-sql: true
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.PostgreSQLDialect
-    autoconfigure:
-        exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+    sql:
+        init:
+            mode: never
+    devtools:
+        restart:
+            enabled: true
 
     data:
         redis:
@@ -37,5 +41,4 @@ spring:
     kafka:
         bootstrap-servers: localhost:9092
         consumer:
-            group-id:
-                streaming-service: streaming-service
+            group-id: streaming-service

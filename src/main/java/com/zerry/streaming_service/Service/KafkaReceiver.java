@@ -1,4 +1,4 @@
-package com.zerry.streaming_service.Service;
+package com.zerry.streaming_service.service;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class KafkaReceiver {
      *
      * @param message 수신된 메시지
      */
-    @KafkaListener(topics = "test-topic", groupId = "test")
+    @KafkaListener(topics = "test-topic", groupId = "streaming-service")
     public void listen(String message) {
         log.info("Test message: {}", message);
     }
