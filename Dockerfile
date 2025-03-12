@@ -5,7 +5,7 @@ FROM openjdk:17-jre-slim
 WORKDIR /app
 
 # Maven 빌드 산출물 복사 (jar 파일)
-COPY target/streaming-service-0.0.1-SNAPSHOT.jar app.jar
+COPY target/flix-streaming-0.0.1-SNAPSHOT.jar app.jar
 
 # 8080 포트 개방
 EXPOSE 8080

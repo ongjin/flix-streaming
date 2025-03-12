@@ -36,13 +36,17 @@ services:
         container_name: postgres
         restart: always
         environment:
-            POSTGRES_DB: flix # 원하는 DB 이름
+            # POSTGRES_DB: flix_auth
+            # POSTGRES_DB: flix_session
+            # POSTGRES_DB: flix_streaming
+            POSTGRES_DB: flix
             POSTGRES_USER: dydwls140 # DB 사용자명
             POSTGRES_PASSWORD: "@astems1027" # DB 비밀번호
         ports:
             - "5432:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data # 데이터 영구 저장
+            # - ./postgres-init:/docker-entrypoint-initdb.d # 초기 SQL 실행
 
 volumes:
     postgres_data:

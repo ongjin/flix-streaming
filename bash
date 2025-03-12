@@ -1,3 +1,3 @@
 mvn clean package
-docker build -t streaming-service .
-docker run -p 8080:8080 streaming-service
+docker build -t flix-streaming .
+docker run -p 8080:8080 flix-streaming

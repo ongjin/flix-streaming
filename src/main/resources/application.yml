@@ -13,9 +13,9 @@ spring:
             name: admin
             password: 1234
     application:
-        name: streaming-service
+        name: flix-streaming
     datasource:
-        url: jdbc:postgresql://localhost:5432/flix-streaming
+        url: jdbc:postgresql://localhost:5432/flix_streaming
         username: dydwls140
         password: "@astems1027"
         driver-class-name: org.postgresql.Driver
@@ -41,4 +41,4 @@ spring:
     kafka:
         bootstrap-servers: localhost:9092
         consumer:
-            group-id: streaming-service
+            group-id: flix-streaming

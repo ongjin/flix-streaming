@@ -13,8 +13,8 @@ Spring Boot 기반 스트리밍 서비스 예제 프로젝트입니다.
 1.  프로젝트 빌드:
     ```bash
     mvn clean package
-    docker build -t streaming-service .
-    docker run -p 8050:8050 streaming-service
+    docker build -t flix-streaming .
+    docker run -p 8050:8050 flix-streaming
     ```
 
 ## 사용 기술
