@@ -1,14 +1,19 @@
 package com.zerry.flix_streaming.Controller;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.UrlResource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.zerry.flix_streaming.dto.ContentDto;
 import com.zerry.flix_streaming.response.ApiResponse;
@@ -16,6 +21,13 @@ import com.zerry.flix_streaming.service.ContentService;
 import com.zerry.flix_streaming.service.KafkaSender;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.*;
+import org.springframework.http.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 @RestController
 @Slf4j
@@ -26,6 +38,8 @@ public class StreamingController {
 
     @Autowired
     private ContentService contentService;
+
+    private final String videoDir = "flix-streaming/src/main/resources/videos/";
 
     @GetMapping("/health")
     public ResponseEntity<ApiResponse<String>> healthCheck() {
@@ -89,5 +103,94 @@ public class StreamingController {
             return ResponseEntity.status(404).body(ApiResponse.fail("콘텐츠를 찾을 수 없습니다."));
         }
         return ResponseEntity.ok(ApiResponse.success(content));
+    }
+
+    /**
+     * 정적 스트리밍 서비스: 파일을 그대로 Resource로 반환합니다.
+     */
+    @GetMapping(value = "/static-video/{filename}", produces = "video/mp4")
+    public ResponseEntity<Resource> getStaticVideo(@PathVariable String filename) throws IOException {
+        Path videoPath = Paths.get(videoDir + filename);
+        Resource resource = new UrlResource(videoPath.toUri());
+        if (!resource.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("video/mp4"))
+                .body(resource);
+    }
+
+    /**
+     * 동적 스트리밍 서비스: 클라이언트의 Range 요청을 처리하여,
+     * 요청한 범위의 바이트만 읽어 전송합니다.
+     */
+    @GetMapping(value = "/dynamic-video/{filename}", produces = "video/mp4")
+    public ResponseEntity<StreamingResponseBody> getDynamicVideo(
+            @PathVariable String filename,
+            @RequestHeader(value = "Range", required = false) String rangeHeader) throws IOException {
+
+        Path videoPath = Paths.get(videoDir + filename);
+        Resource resource = new UrlResource(videoPath.toUri());
+        if (!resource.exists()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        long fileSize = resource.contentLength();
+        AtomicLong rangeStart = new AtomicLong(1024);
+        long rangeEnd = fileSize - 1; // 기본은 파일 전체
+
+        // Range 헤더가 있다면 파싱
+        if (StringUtils.hasText(rangeHeader)) {
+            String rangeValue = rangeHeader.replace("bytes=", "").trim();
+            String[] ranges = rangeValue.split("-");
+            try {
+                if (ranges.length > 0) {
+                    rangeStart.set(Long.parseLong(ranges[0]));
+                    if (ranges.length > 1 && StringUtils.hasText(ranges[1])) {
+                        rangeEnd = Long.parseLong(ranges[1]);
+                    }
+                }
+            } catch (NumberFormatException e) {
+                log.error("Invalid Range Header: {}", rangeHeader, e);
+            }
+            if (rangeEnd > fileSize - 1) {
+                rangeEnd = fileSize - 1;
+            }
+            if (rangeStart.get() > rangeEnd) {
+                return ResponseEntity.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE).build();
+            }
+        }
+
+        long contentLength = rangeEnd - rangeStart.get() + 1;
+
+        // 응답 헤더 설정 (Partial Content인 경우)
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "video/mp4");
+        headers.add("Accept-Ranges", "bytes");
+        if (StringUtils.hasText(rangeHeader)) {
+            headers.add("Content-Range", "bytes " + rangeStart.get() + "-" + rangeEnd + "/" + fileSize);
+            headers.add("Content-Length", String.valueOf(contentLength));
+        } else {
+            headers.add("Content-Length", String.valueOf(fileSize));
+        }
+
+        HttpStatus status = (StringUtils.hasText(rangeHeader)) ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK;
+
+        StreamingResponseBody responseBody = outputStream -> {
+            try (InputStream inputStream = resource.getInputStream()) {
+                // Range 시작 바이트까지 건너뛰기
+                inputStream.skip(rangeStart.get());
+                byte[] buffer = new byte[8192];
+                long bytesRemaining = contentLength;
+                int read;
+                while (bytesRemaining > 0
+                        && (read = inputStream.read(buffer, 0, (int) Math.min(buffer.length, bytesRemaining))) != -1) {
+                    outputStream.write(buffer, 0, read);
+                    bytesRemaining -= read;
+                }
+            }
+        };
+
+        return ResponseEntity.status(status).headers(headers).body(responseBody);
     }
 }
