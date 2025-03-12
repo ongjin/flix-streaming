@@ -1,4 +1,4 @@
-package com.zerry.flix_streaming.Controller;
+package com.zerry.flix_streaming.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
