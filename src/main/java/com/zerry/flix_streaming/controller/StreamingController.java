@@ -3,8 +3,10 @@ package com.zerry.flix_streaming.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zerry.flix_streaming.dto.ContentDto;
 import com.zerry.flix_streaming.response.ApiResponse;
 import com.zerry.flix_streaming.service.ContentService;
@@ -37,6 +41,9 @@ public class StreamingController {
     private KafkaSender kafkaSender;
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private ContentService contentService;
 
     private final String videoDir = "flix-streaming/src/main/resources/videos/";
@@ -44,6 +51,36 @@ public class StreamingController {
     @GetMapping("/health")
     public ResponseEntity<ApiResponse<String>> healthCheck() {
         return ResponseEntity.ok(ApiResponse.success("Streaming Service is running."));
+    }
+
+    @PostMapping("/stream/start")
+    public ResponseEntity<ApiResponse<String>> startStreaming() {
+        // 스트리밍 시작 로직을 수행하고...
+        // 핵심 이벤트 발생 시 Kafka 메시지를 전송합니다.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication != null ? authentication.getName() : "Unknown";
+        String logMessage = createLogMessage("STREAMING_START",
+                "Streaming session started for user: " + username);
+        kafkaSender.send("streaming", logMessage);
+        return ResponseEntity.ok(ApiResponse.success("Streaming started for user: " + username));
+    }
+
+    private String createLogMessage(String event, String message) {
+        ObjectNode logJson = objectMapper.createObjectNode();
+        logJson.put("timestamp", Instant.now().toString());
+        logJson.put("service_name", "streaming");
+        logJson.put("log_level", "INFO");
+        logJson.put("event", event);
+        logJson.put("message", message);
+        logJson.put("request_id", UUID.randomUUID().toString());
+        logJson.put("host", "streaming-server-01");
+        logJson.put("environment", "production");
+        try {
+            return objectMapper.writeValueAsString(logJson);
+        } catch (Exception e) {
+            // 실제 환경에서는 적절한 예외 처리 로직 추가
+            return "{}";
+        }
     }
 
     @GetMapping("/")
@@ -91,6 +128,16 @@ public class StreamingController {
     public ResponseEntity<ApiResponse<List<ContentDto>>> getContents() {
         List<ContentDto> contents = contentService.getAllContents();
         return ResponseEntity.ok(ApiResponse.success("콘텐츠 목록 조회 성공", contents));
+    }
+
+    @GetMapping("/stream/continue")
+    public ResponseEntity<ApiResponse<String>> continueWatching() {
+        // 예: 세션 서버와 연동하여, 인증된 사용자에 대한 마지막 재생 위치 조회
+        // (여기서는 간단히 예시 메시지로 처리)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication != null ? authentication.getName() : "Unknown";
+        String continueInfo = "User " + username + " last watched at 600 seconds.";
+        return ResponseEntity.ok(ApiResponse.success(continueInfo));
     }
 
     /**

@@ -17,6 +17,28 @@ Spring Boot 기반 스트리밍 서비스 예제 프로젝트입니다.
     docker run -p 8050:8050 flix-streaming
     ```
 
+## 로그 포맷 예시
+
+```
+	{
+	"timestamp": "2025-03-13T12:34:56.789Z",
+	"service_name": "auth",
+	"log_level": "INFO",
+	"message": "사용자 로그인 성공",
+	"request_id": "123e4567-e89b-12d3-a456-426614174000",
+	"host": "auth-server-01",
+	"environment": "production"
+	}
+주요 필드 설명:
+timestamp: ISO 8601 형식의 시간 정보
+service_name: 서비스 식별 (예: auth, streaming)
+log_level: 로그 심각도 (INFO, WARN, ERROR 등)
+message: 실제 로그 메시지
+request_id: 분산 추적을 위한 고유 식별자
+host: 서버 호스트 정보
+environment: 배포 환경 정보
+```
+
 ## 사용 기술
 
 -   Language
