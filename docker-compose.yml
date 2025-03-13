@@ -124,7 +124,8 @@ services:
         depends_on:
             kafka:
                 condition: service_healthy
-        command: ["filebeat", "-e"]
+        # entrypoint: "filebeat -e -strict.perms=false"
+        command: ["filebeat", "-e", "-strict.perms=false"]
 
 volumes:
     postgres_data:
