@@ -5,7 +5,7 @@ Spring Boot 기반 스트리밍 서비스 예제 프로젝트입니다.
 ## 주요 기능
 
 -   REST API (예: 헬스체크)
--   PostgreSQL, Redis, Kafka 연동
+-   PostgreSQL, Redis, filebeat, Kafka 연동
 -   Docker 컨테이너화
 
 ## 빌드 및 실행
@@ -18,8 +18,6 @@ Spring Boot 기반 스트리밍 서비스 예제 프로젝트입니다.
     ```
 
 ## 로그 포맷 예시
-
-
 
 ## 사용 기술
 

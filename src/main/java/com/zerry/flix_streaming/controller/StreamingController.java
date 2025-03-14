@@ -5,13 +5,11 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -22,23 +20,17 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zerry.flix_streaming.dto.ContentDto;
 import com.zerry.flix_streaming.response.ApiResponse;
 import com.zerry.flix_streaming.service.ContentService;
-import com.zerry.flix_streaming.service.KafkaSender;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
 import org.springframework.http.*;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
 @RestController
 @Slf4j
 public class StreamingController {
-
-    @Autowired
-    private KafkaSender kafkaSender;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -56,15 +48,12 @@ public class StreamingController {
     @PostMapping("/stream/start")
     public ResponseEntity<ApiResponse<String>> startStreaming() {
         // 스트리밍 시작 로직을 수행하고...
-        // 핵심 이벤트 발생 시 Kafka 메시지를 전송합니다.
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication != null ? authentication.getName() : "Unknown";
-        String logMessage = createLogMessage("STREAMING_START",
-                "Streaming session started for user: " + username);
-        kafkaSender.send("streaming", logMessage);
         return ResponseEntity.ok(ApiResponse.success("Streaming started for user: " + username));
     }
 
+    @SuppressWarnings("unused")
     private String createLogMessage(String event, String message) {
         ObjectNode logJson = objectMapper.createObjectNode();
         logJson.put("timestamp", Instant.now().toString());
@@ -102,22 +91,6 @@ public class StreamingController {
         // 스트리밍 콘텐츠(예시)를 반환합니다.
         String content = "Streaming content for user: " + username;
         return ResponseEntity.ok(ApiResponse.success(content));
-    }
-
-    /**
-     * "test-topic" 토픽의 메시지를 수신합니다.
-     * 
-     * @param message 수신된 메시지
-     */
-    @KafkaListener(topics = "test-topic", groupId = "flix-streaming")
-    public void listen(String message) {
-        log.debug("Received message: {}", message);
-    }
-
-    @PostMapping("/kafka-send")
-    public ResponseEntity<ApiResponse<String>> kafkaSend(@RequestBody Map<String, Object> map) {
-        kafkaSender.send(map.get("topic").toString(), map.get("message").toString());
-        return ResponseEntity.ok(ApiResponse.success("메시지 전송 완료", null));
     }
 
     /**

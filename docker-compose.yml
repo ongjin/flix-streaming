@@ -1,21 +1,27 @@
-version: "3"
+version: "3.8"
 services:
     zookeeper:
         image: confluentinc/cp-zookeeper:latest
-        container_name: zookeeper
+        # container_name: zookeeper
+        deploy:
+            replicas: 1
+        hostname: zookeeper
         environment:
             ZOOKEEPER_CLIENT_PORT: 2181
             ZOOKEEPER_TICK_TIME: 2000
         ports:
             - "2181:2181"
         networks:
-            - msanetwork
+            - msa_network
 
     kafka:
         image: confluentinc/cp-kafka:latest
-        container_name: kafka
+        # container_name: kafka
+        deploy:
+            replicas: 1
         depends_on:
             - zookeeper
+        hostname: kafka
         environment:
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -28,7 +34,7 @@ services:
             - "9092:9092"
             - "29092:29092"
         networks:
-            - msanetwork
+            - msa_network
         healthcheck:
             test:
                 [
@@ -44,16 +50,22 @@ services:
 
     redis:
         image: redis:latest
-        container_name: redis
+        # container_name: redis
+        hostname: redis
+        deploy:
+            replicas: 1
         ports:
             - "6379:6379"
         networks:
-            - msanetwork
+            - msa_network
 
     postgres:
         image: postgres:latest
-        container_name: postgres
-        restart: always
+        # container_name: postgres
+        hostname: postgres
+        deploy:
+            replicas: 1
+        # restart: always
         environment:
             # POSTGRES_DB: flix_auth
             # POSTGRES_DB: flix_session
@@ -67,11 +79,14 @@ services:
             - postgres_data:/var/lib/postgresql/data # 데이터 영구 저장
             # - ./postgres-init:/docker-entrypoint-initdb.d # 초기 SQL 실행
         networks:
-            - msanetwork
+            - msa_network
 
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
-        container_name: elasticsearch
+        # container_name: elasticsearch
+        hostname: elasticsearch
+        deploy:
+            replicas: 1
         environment:
             - discovery.type=single-node
             - ES_JAVA_OPTS=-Xms1g -Xmx1g
@@ -86,11 +101,13 @@ services:
         volumes:
             - esdata:/usr/share/elasticsearch/data
         networks:
-            - msanetwork
+            - msa_network
 
     logstash:
         image: docker.elastic.co/logstash/logstash:7.10.0
-        container_name: logstash
+        # container_name: logstash
+        deploy:
+            replicas: 1
         depends_on:
             - elasticsearch
         ports:
@@ -100,46 +117,112 @@ services:
             - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
             - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
         networks:
-            - msanetwork
+            - msa_network
 
     kibana:
         image: docker.elastic.co/kibana/kibana:7.10.0
-        container_name: kibana
+        # container_name: kibana
+        deploy:
+            replicas: 1
         depends_on:
             - elasticsearch
         ports:
             - "5601:5601"
         networks:
-            - msanetwork
+            - msa_network
 
     filebeat:
         image: docker.elastic.co/beats/filebeat:7.10.0
-        container_name: filebeat
+        # container_name: filebeat
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
         user: root
         volumes:
             - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
             - ./logs:/logs:ro
         networks:
-            - msanetwork
+            - msa_network
+        # depends_on:
+        #     kafka:
+        #         condition: service_healthy
         depends_on:
-            kafka:
-                condition: service_healthy
+            - kafka
         # entrypoint: "filebeat -e -strict.perms=false"
         command: ["filebeat", "-e", "-strict.perms=false"]
 
+    auth-service:
+        # build: ../flix-auth
+        image: flix-streaming-auth-service
+        # container_name: auth-service
+        deploy:
+            replicas: 2
+        ports:
+            - "8050:8050"
+        environment:
+            SPRING_PROFILES_ACTIVE: docker
+        depends_on:
+            - postgres
+        networks:
+            - msa_network
+    streaming-service:
+        # build: .
+        image: flix-streaming-streaming-service
+        # container_name: streaming-service
+        deploy:
+            replicas: 2
+        ports:
+            - "8051:8051"
+        environment:
+            SPRING_PROFILES_ACTIVE: docker
+        depends_on:
+            - postgres
+        networks:
+            - msa_network
+    session-service:
+        # build: ../flix-session
+        image: flix-streaming-session-service
+        # container_name: session-service
+        deploy:
+            replicas: 2
+        ports:
+            - "8052:8052"
+        environment:
+            SPRING_PROFILES_ACTIVE: docker
+        depends_on:
+            - redis
+        networks:
+            - msa_network
+
 volumes:
     postgres_data:
+        external: true
     esdata:
 
 networks:
-    msanetwork:
-        driver: bridge
+    msa_network:
+        driver: overlay
 # docker-compose up
 
-# docker exec -it kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic session-topic --from-beginning
-# docker exec -it kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic streaming --from-beginning
 # docker exec -it kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic spring-logs --from-beginning
-# docker exec -it kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic test-topic --from-beginning
+# docker exec -it kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic spring-logs --from-beginning
+
+# docker swarm 사용
+# docker swarm init
+# docker stack deploy -c docker-compose.yml msa_stack
+
+# docker service ps [서비스네임]
+
+# taskID에서 컨테이너 ID찾기
+# docker inspect --format '{{.Status.ContainerStatus.ContainerID}}' s7lxzbdzfxbb
+# 한줄로 접속
+# docker exec -it $(docker inspect --format '{{.Status.ContainerStatus.ContainerID}}' $(docker service ps -q [서비스네임] | head -n 1)) bash
+
+# 수동 스케일링
+# docker service scale msa_stack_auth-service=1
+# 오토 스케일링
+# 프로메테우스
 
 # redis-cli -h localhost -p 6379
 # get

@@ -2,11 +2,10 @@ filebeat.inputs:
     - type: log
       enabled: true
       paths:
-          - ./logs/application.log
-      # 만약 로그가 여러 줄로 구성되어 있다면 multiline 설정을 추가할 수 있음
-    #   multiline.pattern: '^\d{4}-\d{2}-\d{2}'
-    #   multiline.negate: true
-    #   multiline.match: after
+          - ./logs/*.log
+      multiline.pattern: '^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d{3}'
+      multiline.negate: true
+      multiline.match: after
 
 # Kafka로 로그를 전송하는 output 설정
 output.kafka:

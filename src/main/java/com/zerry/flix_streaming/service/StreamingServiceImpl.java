@@ -1,6 +1,5 @@
 package com.zerry.flix_streaming.service;
 
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class StreamingServiceImpl implements StreamingService {
-    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
     public String getGreeting(String name) {

@@ -1,14 +1,13 @@
-# Base image: OpenJDK (버전에 맞게 수정)
-FROM openjdk:17-jre-slim
-
-# 작업 디렉토리 생성
+# multi-stage build 예시
+FROM openjdk:17-jdk-alpine AS builder
 WORKDIR /app
+# 소스코드 복사 및 빌드
+COPY . .
+RUN ./mvnw clean package -DskipTests
 
-# Maven 빌드 산출물 복사 (jar 파일)
-COPY target/flix-streaming-0.0.1-SNAPSHOT.jar app.jar
-
-# 8080 포트 개방
+FROM openjdk:17-jdk-alpine
+WORKDIR /app
+# 빌드 결과물 복사 (예: target/*.jar)
+COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
-
-# 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]

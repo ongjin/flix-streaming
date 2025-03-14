@@ -15,14 +15,14 @@ spring:
     application:
         name: flix-streaming
     datasource:
-        url: jdbc:postgresql://localhost:5432/flix_streaming
+        url: jdbc:postgresql://postgres:5432/flix_streaming
         username: dydwls140
         password: "@astems1027"
         driver-class-name: org.postgresql.Driver
     jpa:
         hibernate:
             # ddl-auto: update # 애플리케이션 시작 시 데이터베이스 스키마를 자동 업데이트합니다.
-            ddl-auto: none
+            ddl-auto: update
         show-sql: true
         properties:
             hibernate:
@@ -38,7 +38,3 @@ spring:
         redis:
             host: localhost
             port: 6379
-    kafka:
-        bootstrap-servers: localhost:29092
-        consumer:
-            group-id: flix-streaming
