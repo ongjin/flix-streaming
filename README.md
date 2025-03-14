@@ -2,6 +2,8 @@
 
 Spring Boot 기반 스트리밍 서비스 예제 프로젝트입니다.
 
+![용진 서버](https://github.com/user-attachments/assets/2d017b86-7749-457a-8a53-1718ce33c919)
+
 ## 주요 기능
 
 -   REST API (예: 헬스체크)
