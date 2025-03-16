@@ -2,7 +2,7 @@
 <configuration>
     <property name="CONSOLE_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %magenta([%thread]) %highlight([%-3level]) %logger{5} - %msg %n" />
     <property name="ROLLING_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}  %logger{5} - %msg %n" />
-    <property name="FILE_NAME" value="./flix-streaming/logs/application.log" />
+    <property name="FILE_NAME" value="./logs/application.log" />
     <property name="LOG_NAME_PATTERN" value="./logs/%d{yyyy-MM-dd}/application-%d{yyyy-MM-dd-HH-mm}.%i.log" />
     <property name="MAX_FILE_SIZE" value="10MB" />
     <property name="TOTAL_SIZE" value="30MB" />
@@ -43,6 +43,9 @@
     <logger name="org.hibernate.SQL" level="DEBUG" additive="false">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ROLLING_LOG_FILE"/>
+    </logger>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" additive="false">
+        <appender-ref ref="STDOUT"/>
     </logger>
     <logger name="com.example.todolist.controller" level="INFO" additive="true" >
         <appender-ref ref="STDOUT"/>
