@@ -2,6 +2,8 @@ package com.zerry.flix_streaming.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,6 +22,9 @@ import java.util.Collections;
  * 클라이언트 요청에서 JWT 토큰을 추출하여 검증한 후, 인증 정보를 SecurityContext에 저장합니다.
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
@@ -29,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             try {
-                Claims claims = JwtUtil.validateToken(token);
+                Claims claims = jwtUtil.validateToken(token);
                 if (claims != null) {
                     String username = claims.getSubject();
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

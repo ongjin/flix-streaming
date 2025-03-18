@@ -1,15 +1,21 @@
 package com.zerry.flix_streaming.dto;
 
 import lombok.Data;
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 @Data
 public class ContentDto {
     private Long id;
     private String title;
     private String description;
+    private String fileUrl;
     private String genre;
-    private LocalDate releaseDate;
-    private int duration;
+    private String thumbnailUrl;
+    private Integer duration;
+    private String status;
     private String contentUrl;
+    private LocalDateTime releaseDate;
+    private LocalDateTime uploadedAt;
+    private LocalDateTime updatedAt;
 }

@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -29,17 +28,21 @@ public class Content {
     private String title;
 
     // 동영상 설명
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", length = 5000)
     private String description;
 
     // 장르 (예: 액션, 코미디 등)
     private String genre;
 
     // 출시일
-    private LocalDate releaseDate;
+    private LocalDateTime releaseDate;
 
     // 동영상 재생 시간 (초 단위)
     private int duration;
+
+    private String fileUrl;
+    private String thumbnailUrl;
+    private String status; // live, archived 등
 
     // 실제 동영상 파일의 URL (CDN 주소 등)
     @Column(length = 500)

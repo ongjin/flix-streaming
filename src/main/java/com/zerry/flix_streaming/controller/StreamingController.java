@@ -2,6 +2,7 @@ package com.zerry.flix_streaming.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
@@ -9,10 +10,20 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,13 +31,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zerry.flix_streaming.dto.ContentDto;
 import com.zerry.flix_streaming.response.ApiResponse;
 import com.zerry.flix_streaming.service.ContentService;
+import com.zerry.flix_streaming.service.SessionService;
+import com.zerry.flix_streaming.util.SecurityUtil;
 
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.http.*;
-import java.nio.file.Path;
-import org.springframework.core.io.Resource;
-import org.springframework.util.StringUtils;
 
 @RestController
 @Slf4j
@@ -37,6 +45,12 @@ public class StreamingController {
 
     @Autowired
     private ContentService contentService;
+
+    @Autowired
+    private SessionService sessionService;
+
+    @Autowired
+    private SecurityUtil securityUtil;
 
     private final String videoDir = "flix-streaming/src/main/resources/videos/";
 
@@ -54,10 +68,21 @@ public class StreamingController {
      */
     @PostMapping("/stream/start")
     public ResponseEntity<ApiResponse<String>> startStreaming() {
-        // 스트리밍 시작 로직을 수행하고...
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication != null ? authentication.getName() : "Unknown";
-        return ResponseEntity.ok(ApiResponse.success("Streaming started for user: " + username));
+        log.info("securityUtil: {}", securityUtil.toString());
+        // String username = (authentication != null) ? authentication.getName() :
+        // "Unknown";
+        String username = securityUtil.getUsername();
+        Long userId = securityUtil.getUserId();
+        boolean sessionCreated = sessionService.createSession(username, userId);
+        if (sessionCreated) {
+            // 필요 시 로그 기록 추가 (예: createLogMessage 메서드 활용)
+            return ResponseEntity.ok(ApiResponse.success("Streaming started for user: " + username));
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail("Failed to create session for user: " + username));
+        }
+
     }
 
     @SuppressWarnings("unused")
@@ -154,9 +179,8 @@ public class StreamingController {
 
         long fileSize = resource.contentLength();
         AtomicLong rangeStart = new AtomicLong(1024);
-        long rangeEnd = fileSize - 1; // 기본은 파일 전체
+        long rangeEnd = fileSize - 1;
 
-        // Range 헤더가 있다면 파싱
         if (StringUtils.hasText(rangeHeader)) {
             String rangeValue = rangeHeader.replace("bytes=", "").trim();
             String[] ranges = rangeValue.split("-");
@@ -179,8 +203,6 @@ public class StreamingController {
         }
 
         long contentLength = rangeEnd - rangeStart.get() + 1;
-
-        // 응답 헤더 설정 (Partial Content인 경우)
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "video/mp4");
         headers.add("Accept-Ranges", "bytes");
@@ -190,18 +212,16 @@ public class StreamingController {
         } else {
             headers.add("Content-Length", String.valueOf(fileSize));
         }
-
-        HttpStatus status = (StringUtils.hasText(rangeHeader)) ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK;
+        HttpStatus status = StringUtils.hasText(rangeHeader) ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK;
 
         StreamingResponseBody responseBody = outputStream -> {
             try (InputStream inputStream = resource.getInputStream()) {
-                // Range 시작 바이트까지 건너뛰기
                 inputStream.skip(rangeStart.get());
                 byte[] buffer = new byte[8192];
                 long bytesRemaining = contentLength;
                 int read;
-                while (bytesRemaining > 0
-                        && (read = inputStream.read(buffer, 0, (int) Math.min(buffer.length, bytesRemaining))) != -1) {
+                while (bytesRemaining > 0 &&
+                        (read = inputStream.read(buffer, 0, (int) Math.min(buffer.length, bytesRemaining))) != -1) {
                     outputStream.write(buffer, 0, read);
                     bytesRemaining -= read;
                 }
