@@ -40,11 +40,18 @@ public class StreamingController {
 
     private final String videoDir = "flix-streaming/src/main/resources/videos/";
 
+    /**
+     * 헬스 체크 엔드포인트
+     */
     @GetMapping("/health")
     public ResponseEntity<ApiResponse<String>> healthCheck() {
         return ResponseEntity.ok(ApiResponse.success("Streaming Service is running."));
     }
 
+    /**
+     * 스트리밍 시작 API
+     * 세션 생성, 로그 기록 추가 로직 구현 필요
+     */
     @PostMapping("/stream/start")
     public ResponseEntity<ApiResponse<String>> startStreaming() {
         // 스트리밍 시작 로직을 수행하고...
@@ -72,16 +79,6 @@ public class StreamingController {
         }
     }
 
-    @GetMapping("/")
-    public ResponseEntity<ApiResponse<String>> index() {
-        log.trace("TRACE!!");
-        log.debug("DEBUG!!");
-        log.info("INFO!!");
-        log.warn("WARN!!");
-        log.error("ERROR!!");
-        return ResponseEntity.ok(ApiResponse.success("index"));
-    }
-
     @GetMapping("/stream")
     public ResponseEntity<ApiResponse<String>> streamContent() {
         // SecurityContextHolder에서 인증된 사용자 정보를 가져옵니다.
@@ -103,6 +100,18 @@ public class StreamingController {
         return ResponseEntity.ok(ApiResponse.success("콘텐츠 목록 조회 성공", contents));
     }
 
+    /**
+     * 특정 콘텐츠의 상세 정보 조회 API
+     */
+    @GetMapping("/stream/contents/{id}")
+    public ResponseEntity<ApiResponse<ContentDto>> getContentById(@PathVariable Long id) {
+        ContentDto content = contentService.getContentById(id);
+        if (content == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.fail("콘텐츠를 찾을 수 없습니다."));
+        }
+        return ResponseEntity.ok(ApiResponse.success(content));
+    }
+
     @GetMapping("/stream/continue")
     public ResponseEntity<ApiResponse<String>> continueWatching() {
         // 예: 세션 서버와 연동하여, 인증된 사용자에 대한 마지막 재생 위치 조회
@@ -114,23 +123,11 @@ public class StreamingController {
     }
 
     /**
-     * 특정 콘텐츠의 상세 정보 조회 API
-     */
-    @GetMapping("/stream/contents/{id}")
-    public ResponseEntity<ApiResponse<ContentDto>> getContentById(@PathVariable Long id) {
-        ContentDto content = contentService.getContentById(id);
-        if (content == null) {
-            return ResponseEntity.status(404).body(ApiResponse.fail("콘텐츠를 찾을 수 없습니다."));
-        }
-        return ResponseEntity.ok(ApiResponse.success(content));
-    }
-
-    /**
      * 정적 스트리밍 서비스: 파일을 그대로 Resource로 반환합니다.
      */
     @GetMapping(value = "/static-video/{filename}", produces = "video/mp4")
     public ResponseEntity<Resource> getStaticVideo(@PathVariable String filename) throws IOException {
-        Path videoPath = Paths.get(videoDir + filename);
+        Path videoPath = Paths.get(videoDir, filename);
         Resource resource = new UrlResource(videoPath.toUri());
         if (!resource.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -149,7 +146,7 @@ public class StreamingController {
             @PathVariable String filename,
             @RequestHeader(value = "Range", required = false) String rangeHeader) throws IOException {
 
-        Path videoPath = Paths.get(videoDir + filename);
+        Path videoPath = Paths.get(videoDir, filename);
         Resource resource = new UrlResource(videoPath.toUri());
         if (!resource.exists()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
