@@ -32,7 +32,6 @@ import com.zerry.flix_streaming.dto.ContentDto;
 import com.zerry.flix_streaming.response.ApiResponse;
 import com.zerry.flix_streaming.service.ContentService;
 import com.zerry.flix_streaming.service.SessionService;
-import com.zerry.flix_streaming.util.SecurityUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,9 +47,6 @@ public class StreamingController {
 
     @Autowired
     private SessionService sessionService;
-
-    @Autowired
-    private SecurityUtil securityUtil;
 
     private final String videoDir = "flix-streaming/src/main/resources/videos/";
 
@@ -69,15 +65,13 @@ public class StreamingController {
     @PostMapping("/stream/start")
     public ResponseEntity<ApiResponse<String>> startStreaming() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("securityUtil: {}", securityUtil.toString());
-        // String username = (authentication != null) ? authentication.getName() :
-        // "Unknown";
-        String username = securityUtil.getUsername();
-        Long userId = securityUtil.getUserId();
+        String username = (authentication != null) ? authentication.getName() : "Unknown";
+        Long userId = (authentication != null) ? Long.parseLong(authentication.getCredentials().toString()) : 0L;
         boolean sessionCreated = sessionService.createSession(username, userId);
         if (sessionCreated) {
             // 필요 시 로그 기록 추가 (예: createLogMessage 메서드 활용)
-            return ResponseEntity.ok(ApiResponse.success("Streaming started for user: " + username));
+            return ResponseEntity.ok(ApiResponse.success("Streaming started for user: " +
+                    username));
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail("Failed to create session for user: " + username));

@@ -3,7 +3,11 @@ package com.zerry.flix_streaming.util;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.JwtException;
 
 /**
@@ -21,10 +25,16 @@ public class JwtUtil {
      * @return Claims (토큰에 포함된 정보)
      * @throws JwtException 검증 실패 시 발생
      */
-    public Claims validateToken(String token) throws JwtException {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY.getBytes())
-                .parseClaimsJws(token)
-                .getBody();
+    public static Claims validateToken(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(SECRET_KEY.getBytes())
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
+            throw new RuntimeException("Invalid JWT token", e);
+        } catch (ExpiredJwtException e) {
+            throw new RuntimeException("Expired JWT token", e);
+        }
     }
 }

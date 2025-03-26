@@ -21,7 +21,7 @@ public class SessionServiceImpl implements SessionService {
     private final RestTemplate restTemplate;
 
     // 세션 서버는 도커 네트워크상에서 session-service:8052로 접근
-    @Value("${session.service.url:http://session-service:8052}")
+    @Value("${session.service.url:http://localhost:8052}")
     private String sessionServiceUrl;
 
     public SessionServiceImpl(RestTemplateBuilder restTemplateBuilder) {

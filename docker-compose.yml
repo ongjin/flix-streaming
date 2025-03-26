@@ -210,7 +210,8 @@ networks:
 # docker exec -it kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic session-topic --from-beginning
 # docker exec -it kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic streaming --from-beginning
 # docker exec -it kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic spring-logs --from-beginning
-# docker exec -it kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic test-topic --from-beginning
+# docker exec -it kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic beats-logs --from-beginning
+# docker exec -it kafka kafka-topics --bootstrap-server kafka:9092 --describe --topic spring-logs
 
 # redis-cli -h localhost -p 6379
 # get

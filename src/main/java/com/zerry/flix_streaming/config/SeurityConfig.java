@@ -15,6 +15,7 @@ import com.zerry.flix_streaming.security.JwtAuthenticationFilter;
  */
 @Configuration
 public class SeurityConfig {
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
@@ -26,7 +27,8 @@ public class SeurityConfig {
                         .requestMatchers("/stream/**").authenticated() // /stream 요청은 인증 필요
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(),
+                        UsernamePasswordAuthenticationFilter.class)
 
                 .httpBasic(Customizer.withDefaults()); // 기본 HTTP Basic 인증 사용 (테스트용)
         return http.build();
