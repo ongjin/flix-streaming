@@ -23,7 +23,7 @@ spring:
     config:
         activate:
             on-profile: dev
-        import: configserver:http://${CONFIG_DEV_HOST:dev-host}:${CONFIG_DEV_PORT:9058}
+        import: configserver:http://${CONFIG_DEV_HOST:dev-host}:${CONFIG_DEV_PORT}
     cloud:
         config:
             profile: dev
@@ -35,7 +35,7 @@ spring:
     config:
         activate:
             on-profile: prod
-        import: configserver:http://${CONFIG_PROD_HOST:prod-host}:${CONFIG_PROD_PORT:80}
+        import: configserver:http://${CONFIG_PROD_HOST:prod-host}:${CONFIG_PROD_PORT}
     cloud:
         config:
             profile: prod

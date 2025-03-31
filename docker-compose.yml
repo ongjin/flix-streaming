@@ -145,17 +145,19 @@ services:
         # entrypoint: "filebeat -e -strict.perms=false"
         command: ["filebeat", "-e", "-strict.perms=false"]
 
-    # auth-service:
-    #     build: ../flix-auth
-    #     container_name: auth-service
-    #     ports:
-    #         - "8050:8050"
-    #     environment:
-    #         SPRING_PROFILES_ACTIVE: dev
-    #     depends_on:
-    #         - postgres_auth
-    #     networks:
-    #         - msa_network
+    auth-service:
+        build: ../flix-auth
+        container_name: auth-service
+        ports:
+            - "8050:8050"
+        environment:
+            SPRING_PROFILES_ACTIVE: dev
+        depends_on:
+            - postgres_auth
+        networks:
+            - msa_network
+        env_file:
+            - ../flix-auth/.env
     # streaming-service:
     #     build: .
     #     container_name: streaming-service
@@ -169,19 +171,22 @@ services:
     #         - postgres_streaming
     #     networks:
     #         - msa_network
-    # session-service:
-    #     build: ../flix-session
-    #     container_name: session-service
-    #     ports:
-    #         - "8052:8052"
-    #     environment:
-    #         - SPRING_PROFILES_ACTIVE: dev
-    #         - SPRING_REDIS_HOST: redis
-    #         - SPRING_REDIS_PORT: 6379
-    #     depends_on:
-    #         - redis
-    #     networks:
-    #         - msa_network
+    session-service:
+        build: ../flix-session
+        container_name: session-service
+        ports:
+            - "8052:8052"
+        environment:
+            - SPRING_PROFILES_ACTIVE=dev
+            - SPRING_REDIS_HOST=redis
+            - SPRING_REDIS_PORT=6379
+        depends_on:
+            - redis
+        networks:
+            - msa_network
+        env_file:
+            - ../flix-session/.env
+
     config_server:
         build: ../config_server
         container_name: config_server

@@ -1,8 +1,11 @@
 package com.zerry.flix_streaming.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -13,8 +16,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,26 +38,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(7);
             try {
                 Claims claims = JwtUtil.validateToken(token);
-                // subject 에서 userId 추출
                 String userId = claims.getSubject();
-                // claims 에서 username 추출 (예시로 "username" 키를 사용)
                 String username = claims.get("username", String.class);
+
                 if (username == null || username.isEmpty()) {
-                    throw new RuntimeException("JWT token does not contain a valid username");
+                    throw new JwtException("JWT token does not contain a valid username");
                 }
+
+                // 권한 정보 추출
+                List<String> roles = claims.get("roles", List.class);
+                Collection<GrantedAuthority> authorities = new ArrayList<>();
+                if (roles != null) {
+                    roles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+                }
+
+                // Principal 정보 구성
                 Map<String, Object> principal = new HashMap<>();
                 principal.put("userId", userId);
                 principal.put("username", username);
+                principal.put("roles", roles);
 
-                // 인증 객체 생성 (권한은 필요한 경우 설정)
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        username, userId, Collections.emptyList());
-                // 필요에 따라 auth 객체에 username 등의 정보를 추가할 수 있음.
+                // AbstractAuthenticationToken 사용
+                AbstractAuthenticationToken auth = new AbstractAuthenticationToken(authorities) {
+                    @Override
+                    public Object getCredentials() {
+                        return null;
+                    }
+
+                    @Override
+                    public Object getPrincipal() {
+                        return principal;
+                    }
+                };
+                auth.setAuthenticated(true);
+
                 SecurityContextHolder.getContext().setAuthentication(auth);
-            } catch (RuntimeException e) {
-                // JWT 검증 실패 시 컨텍스트 클리어 또는 에러 응답 처리 가능
+
+            } catch (JwtException e) {
                 SecurityContextHolder.clearContext();
-                // 응답에 에러 메시지를 담거나, 필터 체인 종료 로직 추가 가능
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid or expired token");
+            } catch (Exception e) {
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("Authentication failed");
             }
         }
         filterChain.doFilter(request, response);
