@@ -151,9 +151,10 @@ services:
         ports:
             - "8050:8050"
         environment:
-            SPRING_PROFILES_ACTIVE: dev
+            - SPRING_PROFILES_ACTIVE=dev
         depends_on:
-            - postgres_auth
+            postgres_auth:
+                condition: service_started
         networks:
             - msa_network
         env_file:
@@ -187,9 +188,9 @@ services:
         env_file:
             - ../flix-session/.env
 
-    config_server:
+    config-server:
         build: ../config_server
-        container_name: config_server
+        container_name: config-server
         environment:
             SPRING_PROFILES_ACTIVE: dev
         ports:
