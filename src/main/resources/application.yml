@@ -5,6 +5,10 @@ spring:
     profiles:
         active: local # 기본 프로필 설정
 
+app:
+    video:
+        dir: src/main/resources/videos/
+
 ---
 # local 환경 설정
 spring:

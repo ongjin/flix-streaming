@@ -15,4 +15,5 @@ public class SessionDataDto {
     private String status; // 재생 상태 (예: playing, paused 등)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String videoId; // 비디오 ID
 }

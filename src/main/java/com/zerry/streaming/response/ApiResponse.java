@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
-
     private String status; // SUCCESS, FAIL, ERROR 등
     private String message; // 처리 결과 메시지
     private T data; // 실제 응답 데이터
@@ -38,10 +37,20 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    public static <T> ApiResponse<T> success(String message) {
+        return ApiResponse.<T>builder()
+                .status("SUCCESS")
+                .message(message)
+                .data((T) message) // 메시지를 데이터로 사용
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
     public static <T> ApiResponse<T> fail(String message) {
         return ApiResponse.<T>builder()
                 .status("FAIL")
                 .message(message)
+                .data((T) message) // 메시지를 데이터로 사용
                 .timestamp(LocalDateTime.now())
                 .build();
     }
@@ -50,6 +59,7 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .status("ERROR")
                 .message(message)
+                .data((T) message) // 메시지를 데이터로 사용
                 .timestamp(LocalDateTime.now())
                 .build();
     }
