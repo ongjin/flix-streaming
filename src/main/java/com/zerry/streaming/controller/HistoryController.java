@@ -22,9 +22,7 @@ import com.zerry.streaming.dto.SessionDataDto;
 import com.zerry.streaming.response.ApiResponse;
 import com.zerry.streaming.security.CustomUserDetails;
 import com.zerry.streaming.service.SessionService;
-import com.zerry.streaming.dto.StreamingHistoryRequest;
 import com.zerry.streaming.dto.StreamingResponse;
-import io.jsonwebtoken.Claims;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;

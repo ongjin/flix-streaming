@@ -90,6 +90,7 @@ public class JwtTokenProvider {
         String email = claims.get("email", String.class);
 
         // Create a simple CustomUserDetails with the information from the token
+        @SuppressWarnings("unchecked")
         List<SimpleGrantedAuthority> authorities = ((List<String>) claims.get("authorities")).stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());

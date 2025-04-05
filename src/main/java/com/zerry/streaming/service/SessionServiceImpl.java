@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -14,10 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.zerry.streaming.dto.SessionCreateRequest;
 import com.zerry.streaming.dto.SessionCreateResponse;
 import com.zerry.streaming.dto.SessionDataDto;
-import com.zerry.streaming.dto.SessionSearchResponse;
 
 import lombok.extern.slf4j.Slf4j;
 

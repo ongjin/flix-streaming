@@ -1,6 +1,8 @@
 package com.zerry.streaming.service;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.zerry.streaming.dto.ContentDto;
@@ -14,7 +16,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ContentServiceImpl implements ContentService {
 
-    private final ContentRepository contentRepository;
+    @Autowired
+    private ContentRepository contentRepository;
 
     @Override
     public List<ContentDto> getAllContents() {
