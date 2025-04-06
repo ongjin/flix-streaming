@@ -1,11 +1,11 @@
-package com.zerry.flix_streaming;
+package com.zerry.streaming;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 // @SpringBootTest
 @SpringBootTest
-class FlixStreamingApplicationTests {
+class StreamingApplicationTests {
 
 	@Test
 	void contextLoads() {
