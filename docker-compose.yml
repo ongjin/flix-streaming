@@ -10,12 +10,18 @@ services:
             - "2181:2181"
         networks:
             - msa_network
+        healthcheck:
+            test: ["CMD", "nc", "-z", "localhost", "2181"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
     kafka:
         image: confluentinc/cp-kafka:latest
         container_name: kafka
         depends_on:
-            - zookeeper
+            zookeeper:
+                condition: service_healthy
         environment:
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -24,6 +30,12 @@ services:
             KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
             KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            # 토픽 자동 생성 활성화 - 존재하지 않는 토픽에 메시지를 보낼 때 자동으로 생성
+            KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+            # 토픽 삭제 기능 활성화 - 관리자가 토픽을 삭제할 수 있도록 함
+            KAFKA_DELETE_TOPIC_ENABLE: "true"
+            # 로그 보존 기간 설정 - 메시지가 24시간 동안만 보관됨
+            KAFKA_LOG_RETENTION_HOURS: 24
         ports:
             - "9092:9092"
             - "29092:29092"
@@ -41,6 +53,7 @@ services:
             interval: 10s
             timeout: 5s
             retries: 10
+        restart: unless-stopped
 
     redis:
         image: redis:latest
