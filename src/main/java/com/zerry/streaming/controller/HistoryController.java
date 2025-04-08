@@ -88,16 +88,13 @@ public class HistoryController {
      * 사용자의 마지막 재생 위치를 조회합니다.
      */
     @GetMapping("/resume")
-    public ResponseEntity<ApiResponse<ObjectNode>> resumeStreaming(
-            @RequestParam(value = "videoId", required = false, defaultValue = "default") String videoId,
+    public ResponseEntity<ApiResponse<SessionDataDto>> resumeStreaming(
             @RequestHeader(value = "X-Session-Id", required = false) String sessionId) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
         Long userId = userDetails.getId();
-
-        log.info("이어보기 요청: 비디오 {}, 세션 {}", videoId, sessionId);
 
         // 세션 ID가 없으면 세션이 없다고 응답
         if (sessionId == null || sessionId.isEmpty()) {
@@ -108,6 +105,7 @@ public class HistoryController {
 
         // 세션 데이터 조회
         SessionDataDto sessionData = sessionService.getSession(sessionId);
+        log.info("sessionData: {}", sessionData);
         if (sessionData == null) {
             log.info("세션 데이터가 없음: 세션 {}", sessionId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -116,17 +114,11 @@ public class HistoryController {
 
         int lastPosition = sessionData.getLastPosition();
 
-        ObjectNode response = objectMapper.createObjectNode();
-        response.put("sessionId", sessionId);
-        response.put("videoId", videoId);
-        response.put("position", lastPosition);
-
-        return ResponseEntity.ok(ApiResponse.success("재생 위치 조회 완료", response));
+        return ResponseEntity.ok(ApiResponse.success("재생 위치 조회 완료", sessionData));
     }
 
     @PostMapping("/position")
     public ResponseEntity<ApiResponse<ObjectNode>> updatePlaybackPosition(
-            @RequestParam String videoId,
             @RequestParam int position,
             @RequestHeader(value = "X-Session-Id", required = false) String sessionId) {
 
@@ -135,7 +127,7 @@ public class HistoryController {
         String email = userDetails.getUsername();
         Long userId = userDetails.getId();
 
-        log.info("재생 위치 업데이트 요청: 비디오 {}, 위치 {}, 세션 {}", videoId, position, sessionId);
+        log.info("재생 위치 업데이트 요청: 비디오 {}, 위치 {}, 세션 {}", position, sessionId);
 
         // 세션 ID가 없으면 세션이 없다고 응답
         if (sessionId == null || sessionId.isEmpty()) {
@@ -154,10 +146,16 @@ public class HistoryController {
 
         // 세션 위치 업데이트
         boolean success = sessionService.updateSessionPosition(sessionId, position);
+        if (!success) {
+            log.error("세션 위치 업데이트 실패: 세션 {}, 위치 {}", sessionId, position);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail("재생 위치 업데이트에 실패했습니다."));
+        }
+
+        log.info("세션 위치 업데이트 성공: 세션 {}, 위치 {}", sessionId, position);
 
         ObjectNode response = objectMapper.createObjectNode();
         response.put("sessionId", sessionId);
-        response.put("videoId", videoId);
         response.put("position", position);
         response.put("success", success);
 

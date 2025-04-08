@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 services:
     zookeeper:
         image: confluentinc/cp-zookeeper:latest
@@ -67,36 +67,21 @@ services:
             interval: 5s
             timeout: 3s
             retries: 5
+        restart: always
 
-    postgres_auth:
-        image: postgres:latest
-        container_name: postgres_auth
+    postgres:
+        image: postgres:17
+        container_name: postgres
         restart: always
         environment:
-            POSTGRES_DB: flix
-            POSTGRES_USER: dydwls140 # DB 사용자명
-            POSTGRES_PASSWORD: "@astems1027" # DB 비밀번호
+            POSTGRES_DB: postgres
+            POSTGRES_USER: dydwls140
+            POSTGRES_PASSWORD: "@astems1027"
         ports:
             - "5432:5432"
         volumes:
-            - postgres_auth_data:/var/lib/postgresql/data # 데이터 영구 저장
-            # - ./postgres-init:/docker-entrypoint-initdb.d # 초기 SQL 실행
-        networks:
-            - msa_network
-
-    postgres_streaming:
-        image: postgres:latest
-        container_name: postgres_streaming
-        restart: always
-        environment:
-            POSTGRES_DB: flix
-            POSTGRES_USER: dydwls140 # DB 사용자명
-            POSTGRES_PASSWORD: "@astems1027" # DB 비밀번호
-        ports:
-            - "5431:5432"
-        volumes:
-            - postgres_streaming_data:/var/lib/postgresql/data # 데이터 영구 저장
-            # - ./postgres-init:/docker-entrypoint-initdb.d # 초기 SQL 실행
+            - postgres_data:/var/lib/postgresql/data # 데이터 영구 저장
+            - ./postgres-init:/docker-entrypoint-initdb.d # 초기 SQL 실행
         networks:
             - msa_network
 
@@ -158,6 +143,18 @@ services:
         # entrypoint: "filebeat -e -strict.perms=false"
         command: ["filebeat", "-e", "-strict.perms=false"]
 
+    config-server:
+        build: ../config_server
+        container_name: config-server
+        environment:
+            SPRING_PROFILES_ACTIVE: dev
+        ports:
+            - "8058:8058"
+        networks:
+            - msa_network
+        env_file:
+            - ../config_server/.env
+
     auth-service:
         build: ../flix-auth
         container_name: auth-service
@@ -166,7 +163,9 @@ services:
         environment:
             - SPRING_PROFILES_ACTIVE=dev
         depends_on:
-            postgres_auth:
+            postgres:
+                condition: service_started
+            config-server:
                 condition: service_started
         networks:
             - msa_network
@@ -182,7 +181,7 @@ services:
     #         - DB_HOST="postgres_streaming:5432"
 
     #     depends_on:
-    #         - postgres_streaming
+    #         - postgres
     #     networks:
     #         - msa_network
     session-service:
@@ -201,23 +200,8 @@ services:
         env_file:
             - ../flix-session/.env
 
-    config-server:
-        build: ../config_server
-        container_name: config-server
-        environment:
-            SPRING_PROFILES_ACTIVE: dev
-        ports:
-            - "8058:8058"
-        networks:
-            - msa_network
-        env_file:
-            - ../config_server/.env
-
 volumes:
-    postgres_auth_data:
-        external: true
-    postgres_streaming_data:
-        external: true
+    postgres_data:
     esdata:
 
 networks:

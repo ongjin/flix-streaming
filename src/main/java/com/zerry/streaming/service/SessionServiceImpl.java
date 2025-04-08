@@ -6,13 +6,16 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.zerry.streaming.dto.ExternalApiResponse;
 import com.zerry.streaming.dto.SessionCreateResponse;
 import com.zerry.streaming.dto.SessionDataDto;
 
@@ -53,36 +56,52 @@ public class SessionServiceImpl implements SessionService {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<SessionDataDto> request = new HttpEntity<>(sessionData, headers);
-            ResponseEntity<SessionCreateResponse> response = restTemplate.postForEntity(
+            ResponseEntity<ExternalApiResponse<SessionCreateResponse>> response = restTemplate.exchange(
                     url,
+                    HttpMethod.POST,
                     request,
-                    SessionCreateResponse.class);
+                    new ParameterizedTypeReference<ExternalApiResponse<SessionCreateResponse>>() {
+                    });
 
-            log.info("세션 생성 성공: {}", response.getBody());
-            return sessionId;
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                ExternalApiResponse<SessionCreateResponse> apiResponse = response.getBody();
+                if (apiResponse != null && "SUCCESS".equals(apiResponse.getStatus())) {
+                    log.info("세션 생성 성공: {}", sessionId);
+                    return sessionId;
+                }
+            }
+            log.warn("세션 생성 실패: {}", sessionId);
+            return null;
         } catch (Exception e) {
-            log.error("세션 생성 요청 실패: {}", e.getMessage());
+            log.error("세션 생성 요청 실패: {}, 오류: {}", sessionId, e.getMessage());
             return null;
         }
     }
 
+    @Override
     public SessionDataDto getSession(String sessionId) {
         String url = sessionServiceUrl + "/api/v1/sessions/" + sessionId;
 
         try {
-            ResponseEntity<SessionDataDto> response = restTemplate.getForEntity(
+            ResponseEntity<ExternalApiResponse<SessionDataDto>> response = restTemplate.exchange(
                     url,
-                    SessionDataDto.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("세션 조회 성공: {}", sessionId);
-                return response.getBody();
-            } else {
-                log.warn("세션 조회 실패: {}", sessionId);
-                return null;
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<ExternalApiResponse<SessionDataDto>>() {
+                    });
+            log.info("response: {}", response);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                ExternalApiResponse<SessionDataDto> apiResponse = response.getBody();
+                if (apiResponse != null && "SUCCESS".equals(apiResponse.getStatus())) {
+                    SessionDataDto sessionData = apiResponse.getData();
+                    log.info("세션 조회 성공: {}, 위치: {}", sessionId, sessionData.getLastPosition());
+                    return sessionData;
+                }
             }
+            log.warn("세션 조회 실패: {}", sessionId);
+            return null;
         } catch (Exception e) {
-            log.error("세션 조회 요청 실패: {}", e.getMessage());
+            log.error("세션 조회 요청 실패: {}, 오류: {}", sessionId, e.getMessage());
             return null;
         }
     }
@@ -92,25 +111,31 @@ public class SessionServiceImpl implements SessionService {
         String url = sessionServiceUrl + "/api/v1/sessions/" + sessionId;
 
         try {
-            // PATCH 요청을 위한 데이터 준비
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            // PATCH 요청 본문 생성
-            String patchBody = "{\"lastPosition\": " + position + "}";
+            String patchBody = "{\"lastPosition\": " + position + ", \"status\": \"ACTIVE\"}";
             HttpEntity<String> request = new HttpEntity<>(patchBody, headers);
 
-            // PATCH 요청 보내기
-            ResponseEntity<SessionDataDto> response = restTemplate.exchange(
+            ResponseEntity<ExternalApiResponse<SessionDataDto>> response = restTemplate.exchange(
                     url,
-                    org.springframework.http.HttpMethod.PATCH,
+                    HttpMethod.PATCH,
                     request,
-                    SessionDataDto.class);
+                    new ParameterizedTypeReference<ExternalApiResponse<SessionDataDto>>() {
+                    });
 
-            log.info("세션 위치 업데이트 성공: {}", sessionId);
-            return response.getStatusCode().is2xxSuccessful();
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                ExternalApiResponse<SessionDataDto> apiResponse = response.getBody();
+                if (apiResponse != null && "SUCCESS".equals(apiResponse.getStatus())) {
+                    SessionDataDto sessionData = apiResponse.getData();
+                    log.info("세션 위치 업데이트 성공: {}, 위치: {}", sessionId, sessionData.getLastPosition());
+                    return true;
+                }
+            }
+            log.warn("세션 위치 업데이트 실패: {}", sessionId);
+            return false;
         } catch (Exception e) {
-            log.error("세션 위치 업데이트 요청 실패: {}", e.getMessage());
+            log.error("세션 위치 업데이트 요청 실패: {}, 오류: {}", sessionId, e.getMessage());
             return false;
         }
     }
@@ -133,13 +158,17 @@ public class SessionServiceImpl implements SessionService {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    url, request, Map.class);
+            ResponseEntity<ExternalApiResponse<Map<String, Object>>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<ExternalApiResponse<Map<String, Object>>>() {
+                    });
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
-                if ("SUCCESS".equals(responseBody.get("status"))) {
-                    Map<String, Object> data = (Map<String, Object>) responseBody.get("data");
+                ExternalApiResponse<Map<String, Object>> apiResponse = response.getBody();
+                if (apiResponse != null && "SUCCESS".equals(apiResponse.getStatus())) {
+                    Map<String, Object> data = apiResponse.getData();
                     if (data != null) {
                         String sessionId = (String) data.get("sessionId");
                         log.info("기존 세션 찾음: {}", sessionId);
